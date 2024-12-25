@@ -20,7 +20,7 @@ jobs:
       packages: write
       attestations: write
       id-token: write
-      #
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -43,7 +43,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
-          tags: main
+          tags: v4.2.13
 
       # This step generates an artifact attestation for the image, which is an unforgeable statement about where and how it was built. It increases supply chain security for people who consume the image. For more information, see "[AUTOTITLE](/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds)."
       - name: Generate artifact attestation
