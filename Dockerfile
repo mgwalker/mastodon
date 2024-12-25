@@ -1,4 +1,4 @@
-FROM tootsuite/mastodon:v4.2.13 AS src
+FROM tootsuite/mastodon:v4.2.14 AS src
 
 FROM alpine/git AS patch
 COPY --from=src /opt/mastodon /opt/mastodon
@@ -13,4 +13,6 @@ CMD git diff
 FROM tootsuite/mastodon:v4.2.13 AS final
 COPY --from=patch /opt/mastodon /opt/mastodon
 
-CMD rm -f /mastodon/tmp/pids/server.pid; bundle exec rails assets:precompile; bundle exec rails db:setup; bundle exec rails s -b 0.0.0.0 -p 3000
+RUN npm run build:production
+
+CMD rm -f /mastodon/tmp/pids/server.pid; bundle exec rails db:setup; bundle exec rails s -b 0.0.0.0 -p 3000
