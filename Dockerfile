@@ -1,4 +1,4 @@
-FROM tootsuite/mastodon:v4.2.20 AS src
+FROM tootsuite/mastodon:v4.2.21 AS src
 
 FROM alpine/git AS patch
 COPY --from=src /opt/mastodon /opt/mastodon
