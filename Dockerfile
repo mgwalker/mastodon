@@ -1,5 +1,5 @@
 ARG MASTODON_VERSION
-FROM tootsuite/mastodon:v${MASTODON_VERSION} AS src
+FROM ghcr.io/mastodon/mastodon:v${MASTODON_VERSION} AS src
 
 FROM alpine/git AS patch
 COPY --from=src /opt/mastodon /opt/mastodon
