@@ -4,13 +4,11 @@ on:
   push:
     branches: ["main"]
 
-# Set the container registry, image name, the Mastodon version.
+# Set the Mastodon version to build. This is the only place it should be changed
+# anywhere in this repo.
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: mastodon
   MASTODON_VERSION: 4.3.8
 
-# There is a single job in this workflow. It's configured to run on the latest available version of Ubuntu.
 jobs:
   build-and-push-image:
     runs-on: ubuntu-latest
@@ -30,7 +28,7 @@ jobs:
       - name: Log in to the Container registry
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
@@ -46,12 +44,12 @@ jobs:
           build-args: |
             MASTODON_VERSION=${{ env.MASTODON_VERSION }}
           push: true
-          tags: ${{env.IMAGE_NAME}}:v${{ env.MASTODON_VERSION }}
+          tags: ${{ github.action_repository }}:v${{ env.MASTODON_VERSION }}
 
       # This step generates an artifact attestation for the image, which is an unforgeable statement about where and how it was built. It increases supply chain security for people who consume the image. For more information, see "[AUTOTITLE](/actions/security-guides/using-artifact-attestations-to-establish-provenance-for-builds)."
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
         with:
-          subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
+          subject-name: ${{ github.action_repository }}:v${{ env.MASTODON_VERSION }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
