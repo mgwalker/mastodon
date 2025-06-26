@@ -50,7 +50,7 @@ jobs:
           context: ./
           file: ./Dockerfile
           build-args: |
-            MASTODON-VERSION=4.3.8
+            MASTODON_VERSION=4.3.8
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
