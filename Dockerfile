@@ -9,7 +9,7 @@ ADD char-limit.patch /char-limit.patch
 WORKDIR /opt/mastodon
 RUN git apply /char-limit.patch
 
-FROM tootsuite/mastodon:v${MASTODON_VERSION} AS final
+FROM ghcr.io/mastodon/mastodon:v${MASTODON_VERSION} AS final
 COPY --from=patch /opt/mastodon /opt/mastodon
 
 CMD bundle exec rails s -b 0.0.0.0 -p 3000
