@@ -46,7 +46,7 @@ jobs:
           build-args: |
             MASTODON_VERSION=${{ env.MASTODON_VERSION }}
           push: true
-          tags: ghcr.io/${{ github.repository }}:v${{ env.MASTODON_VERSION }}-test
+          tags: ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:v${{ env.MASTODON_VERSION }}-test
           cache-from: |
             type=gha,scope=mastodon
           cache-to: |
@@ -63,7 +63,7 @@ jobs:
           build-args: |
             MASTODON_VERSION=${{ env.MASTODON_VERSION }}
           push: true
-          tags: ghcr.io/${{ github.repository }}-sidekiq:v${{ env.MASTODON_VERSION }}-test
+          tags: ghcr.io/${{ github.repository_owner }}/${{ github.repository }}-sidekiq:v${{ env.MASTODON_VERSION }}-test
           cache-from: |
             type=gha,scope=mastodon
 
