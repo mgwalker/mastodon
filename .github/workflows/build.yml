@@ -1,8 +1,7 @@
 name: Create and publish a Docker image
 
 on:
-  push:
-    branches: ["main"]
+  - push
 
 # Set the Mastodon version to build. This is the only place it should be changed
 # anywhere in this repo
@@ -33,21 +32,47 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       # Build and push the image
-      - name: Build and push Docker image
-        id: push
+      - name: Build and push base Mastodon image
+        id: mastodon
         uses: docker/build-push-action@v6
         with:
           context: ./
           file: ./Dockerfile
+          target: mastodon
           build-args: |
             MASTODON_VERSION=${{ env.MASTODON_VERSION }}
           push: true
-          tags: ghcr.io/${{ github.repository }}:v${{ env.MASTODON_VERSION }}
+          tags: ghcr.io/${{ github.repository }}:v${{ env.MASTODON_VERSION }}-test
+          cache-from: |
+            type=gha,scope=mastodon
+          cache-to: |
+            type=gha,scope=mastodon,mode=max
+
+      # Build and push the image
+      - name: Build and push Sidekiq image
+        id: sidekiq
+        uses: docker/build-push-action@v6
+        with:
+          context: ./
+          file: ./Dockerfile
+          target: sidekiq
+          build-args: |
+            MASTODON_VERSION=${{ env.MASTODON_VERSION }}
+          push: true
+          tags: ghcr.io/${{ github.repository }}-sidekiq:v${{ env.MASTODON_VERSION }}-test
+          cache-from: |
+            type=gha,scope=mastodon
 
       # Generate artifacte attestation for evidence of how it was built
-      - name: Generate artifact attestation
+      - name: Generate Mastodon artifact attestation
         uses: actions/attest-build-provenance@v2
         with:
           subject-name: ghcr.io/${{ github.repository }}
-          subject-digest: ${{ steps.push.outputs.digest }}
+          subject-digest: ${{ steps.mastodon.outputs.digest }}
+          push-to-registry: true
+      - name: Generate Sidekiq artifact attestation
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/${{ github.repository }}-mastodon
+          subject-digest: ${{ steps.sidekiq.outputs.digest }}
           push-to-registry: true
