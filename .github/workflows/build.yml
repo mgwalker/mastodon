@@ -1,7 +1,8 @@
 name: Create and publish a Docker image
 
 on:
-  - push
+  push:
+    branches: ["main"]
 
 # Set the Mastodon version to build. This is the only place it should be changed
 # anywhere in this repo
@@ -14,7 +15,7 @@ jobs:
 
     # Sets the permissions for the GITHUB_TOKEN
     permissions:
-      contents: read
+      contents: write
       packages: write
       attestations: write
       id-token: write
@@ -46,7 +47,7 @@ jobs:
           build-args: |
             MASTODON_VERSION=${{ env.MASTODON_VERSION }}
           push: true
-          tags: ghcr.io/${{ github.repository }}:v${{ env.MASTODON_VERSION }}-test
+          tags: ghcr.io/${{ github.repository }}:v${{ env.MASTODON_VERSION }}
           cache-from: |
             type=gha,scope=mastodon
           cache-to: |
@@ -63,9 +64,14 @@ jobs:
           build-args: |
             MASTODON_VERSION=${{ env.MASTODON_VERSION }}
           push: true
-          tags: ghcr.io/${{ github.repository }}-sidekiq:v${{ env.MASTODON_VERSION }}-test
+          tags: ghcr.io/${{ github.repository }}-sidekiq:v${{ env.MASTODON_VERSION }}
           cache-from: |
             type=gha,scope=mastodon
+
+      - name: Tag the commit
+        run: |
+          git tag v${{ env.MASTODON_VERSION }}
+          git push origin tag v${{ env.MASTODON_VERSION }}
 
       # Generate artifacte attestation for evidence of how it was built
       - name: Generate Mastodon artifact attestation
