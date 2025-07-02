@@ -1,0 +1,93 @@
+name: mastodon
+
+services:
+  database:
+    image: postgres:${POSTGRES_VERSION}
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: ${POSTGRES_HOST_AUTH_METHOD}
+    volumes:
+      - mastodon_database:/var/lib/postgresql/data
+    networks:
+      - mastodon
+
+  queue:
+    image: redis:${REDIS_VERSION}
+    # By default, redis does not require a password, but we want it, so enable
+    # it here. This will be populated by environment variables passed to
+    # Docker Compose itself, not into the container.
+    command: ['--requirepass "${REDIS_PASSWORD}"']
+    volumes:
+      - mastodon_queue:/data
+    networks:
+      - mastodon
+
+  mastodon:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      args:
+        MASTODON_VERSION: ${MASTODON_VERSION}
+    command: "bundle exec rails s -b 0.0.0.0 -p 3000"
+    env_file:
+      - .mastodon.env
+    depends_on:
+      - database
+      - queue
+    environment:
+      # Redis configuration
+      REDIS_HOST: queue
+      REDIS_PORT: 6379 # standard port
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+
+      # Postgres configuration
+      DB_HOST: database
+      DB_PORT: 5432 # standard port
+      DB_USER: ${POSTGRES_USER}
+      DB_PASS: ${POSTGRES_PASSWORD}
+    volumes:
+      - mastodon_data:/mastodon/public/system
+    networks:
+      - mastodon
+
+  streaming:
+    extends: mastodon
+    image: ghcr.io/mastodon/mastodon-streaming:v${MASTODON_VERSION}
+    command: ''
+    depends_on:
+      - mastodon
+
+  sidekiq:
+    extends: mastodon
+    command: "bundle exec sidekiq"
+    depends_on:
+      - mastodon
+
+  # Run Mastodon behind a proxy.
+  proxy:
+    image: nginx:${NGINX_VERSION}
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro -d nginx
+    depends_on:
+      - mastodon
+    ports:
+      - 8080:80
+    networks:
+      - mastodon
+
+  init:
+    extends: mastodon
+    command: "bundle exec rails db:setup"
+    depends_on:
+      - database
+    profiles:
+      ["utility"]
+
+volumes:
+  mastodon_database:
+  mastodon_queue:
+  mastodon_data:
+
+networks:
+  mastodon:
