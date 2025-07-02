@@ -3,6 +3,9 @@ name: Create and publish a Docker image
 on:
   push:
     branches: ["main"]
+    paths:
+      - .github/workflows/build.yml
+      - Dockerfile
 
 # Set the Mastodon version to build. This is the only place it should be changed
 # anywhere in this repo
