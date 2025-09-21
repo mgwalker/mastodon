@@ -11,7 +11,7 @@ on:
 # Set the Mastodon version to build. This is the only place it should be changed
 # anywhere in this repo
 env:
-  MASTODON_VERSION: 4.4.3
+  MASTODON_VERSION: 4.4.4
 
 jobs:
   build-and-push-image:
