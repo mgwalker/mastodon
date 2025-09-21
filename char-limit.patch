@@ -10,7 +10,7 @@ index bda2edba6..76ac65bf3 100644
 +  maxChars: state.getIn(['server', 'server', 'configuration', 'statuses', 'max_characters'], 5000),
  });
  
- const mapDispatchToProps = (dispatch) => ({
+ const mapDispatchToProps = (dispatch, props) => ({
 diff --git a/app/validators/status_length_validator.rb b/app/validators/status_length_validator.rb
 index dc841ded3..9cb1ec94b 100644
 --- a/app/validators/status_length_validator.rb
